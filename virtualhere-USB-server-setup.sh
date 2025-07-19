@@ -2,6 +2,28 @@
 
 echo "🚀 Installiere VirtualHere USB Server für x86_64..."
 
+# Prüfen ob VirtualHere bereits läuft
+if systemctl list-units --type=service --all | grep -q vhusbd.service; then
+    echo "⚠️ VirtualHere scheint bereits installiert zu sein."
+
+    read -p "🧼 Möchtest du eine saubere Neuinstallation durchführen? (j/N): " CONFIRM
+    if [[ "$CONFIRM" =~ ^[Jj]$ ]]; then
+        echo "🧹 Entferne bestehenden VirtualHere-Dienst und Dateien..."
+
+        sudo systemctl stop vhusbd
+        sudo systemctl disable vhusbd
+        sudo rm -f /etc/systemd/system/vhusbd.service
+        sudo rm -f /usr/sbin/vhusbd
+        sudo rm -f /usr/sbin/config.ini
+
+        sudo systemctl daemon-reload
+        echo "✅ Alte Installation entfernt."
+    else
+        echo "❌ Abgebrochen – bestehende Installation bleibt erhalten."
+        exit 0
+    fi
+fi
+
 # System aktualisieren
 sudo apt update && sudo apt upgrade -y
 
