@@ -28,4 +28,4 @@ Ideal für dedizierte USB-Weiterleitungsgeräte – zum Beispiel für Moonlight,
 Führe folgenden Befehl im Terminal aus:
 
 ```bash
-wget -O virtualhere-setup.sh https://raw.githubusercontent.com/Riveria-IT/install-VirtualHere-USB-Server/main/virtualhere-USB-server-setup-x86_64.sh && chmod +x virtualhere-setup.sh && ./virtualhere-setup.sh
+wget -O virtualhere-setup.sh https://raw.githubusercontent.com/Riveria-IT/install-VirtualHere-USB-Server/main/virtualhere-USB-server-setup.sh && chmod +x virtualhere-setup.sh && ./virtualhere-setup.sh
