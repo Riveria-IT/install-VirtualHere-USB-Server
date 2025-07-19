@@ -1,24 +1,24 @@
 #!/bin/bash
 
-echo "🚀 Installiere VirtualHere USB Server..."
+echo "🚀 Installiere VirtualHere USB Server für x86_64..."
 
 # System updaten
 sudo apt update && sudo apt upgrade -y
 
-# VirtualHere USB Server herunterladen und ausführbar machen
-wget https://www.virtualhere.com/sites/default/files/usbserver/vhusbdarm -O vhusbdarm
-chmod +x vhusbdarm
-sudo mv vhusbdarm /usr/sbin/vhusbdarm
+# VirtualHere USB Server (x86_64) herunterladen
+wget https://www.virtualhere.com/sites/default/files/usbserver/vhusbdx86_64 -O vhusbd
+chmod +x vhusbd
+sudo mv vhusbd /usr/sbin/vhusbd
 
-# systemd Dienst einrichten
+# systemd-Dienst erstellen
 echo "🛠️ Erstelle systemd-Dienst..."
 sudo bash -c 'cat > /etc/systemd/system/vhusbd.service <<EOF
 [Unit]
-Description=VirtualHere USB Server
+Description=VirtualHere USB Server (x86_64)
 After=network.target
 
 [Service]
-ExecStart=/usr/sbin/vhusbdarm
+ExecStart=/usr/sbin/vhusbd
 Restart=on-failure
 
 [Install]
@@ -31,4 +31,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable vhusbd
 sudo systemctl start vhusbd
 
-echo "✅ VirtualHere USB Server läuft jetzt auf dem Raspberry Pi!"
+echo "✅ VirtualHere USB Server läuft jetzt auf deinem Linux-System (x86_64)!"
