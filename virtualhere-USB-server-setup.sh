@@ -1,45 +1,51 @@
 #!/bin/bash
 
-echo "🚀 Installiere VirtualHere USB Server für x86_64..."
+echo "🚀 Starte Installation des VirtualHere USB Servers für x86_64..."
 
-# Prüfen ob VirtualHere bereits läuft
-if systemctl list-units --type=service --all | grep -q vhusbd.service; then
-    echo "⚠️ VirtualHere scheint bereits installiert zu sein."
-
-    read -p "🧼 Möchtest du eine saubere Neuinstallation durchführen? (j/N): " CONFIRM
-    if [[ "$CONFIRM" =~ ^[Jj]$ ]]; then
-        echo "🧹 Entferne bestehenden VirtualHere-Dienst und Dateien..."
-
-        sudo systemctl stop vhusbd
-        sudo systemctl disable vhusbd
-        sudo rm -f /etc/systemd/system/vhusbd.service
-        sudo rm -f /usr/sbin/vhusbd
-        sudo rm -f /usr/sbin/config.ini
-
-        sudo systemctl daemon-reload
-        echo "✅ Alte Installation entfernt."
-    else
-        echo "❌ Abgebrochen – bestehende Installation bleibt erhalten."
-        exit 0
-    fi
-fi
-
-# System aktualisieren
+# System updaten
 sudo apt update && sudo apt upgrade -y
 
-# Servernamen abfragen
+# 🔍 Prüfen, ob VirtualHere bereits installiert ist
+if systemctl list-units --all | grep -q vhusbd || \
+   [[ -f "/usr/sbin/vhusbd" ]] || \
+   [[ -f "/usr/sbin/vhusbdx86_64" ]] || \
+   [[ -f "/etc/systemd/system/vhusbd.service" ]] || \
+   [[ -f "/usr/sbin/config.ini" ]]; then
+
+  echo "⚠️ Es wurde eine bestehende Installation erkannt."
+
+  read -p "🧼 Möchtest du eine saubere Neuinstallation durchführen? (j/N): " CONFIRM
+  if [[ "$CONFIRM" == [jJ] ]]; then
+    echo "🧽 Entferne alte Installation..."
+
+    sudo systemctl stop vhusbd 2>/dev/null
+    sudo systemctl disable vhusbd 2>/dev/null
+    sudo rm -f /etc/systemd/system/vhusbd.service
+    sudo rm -f /usr/sbin/vhusbd
+    sudo rm -f /usr/sbin/vhusbdx86_64
+    sudo rm -f /usr/sbin/config.ini
+    sudo systemctl daemon-reload
+
+    echo "✅ Alte Installation erfolgreich entfernt."
+  else
+    echo "❌ Abgebrochen. Bitte entferne alte Installation manuell."
+    exit 1
+  fi
+fi
+
+# 🔤 Nach dem Servernamen fragen
 read -p "🧩 Bitte gib den Namen deines USB-Servers ein (z. B. G27-Host): " SERVERNAME
 
-# VirtualHere Server herunterladen
+# 📥 VirtualHere USB Server herunterladen und einrichten
 wget https://www.virtualhere.com/sites/default/files/usbserver/vhusbdx86_64 -O vhusbd
 chmod +x vhusbd
 sudo mv vhusbd /usr/sbin/vhusbd
 
-# Konfigurationsdatei mit ServerName erstellen
-echo "🔧 Erstelle /usr/sbin/config.ini mit deinem Namen \"$SERVERNAME\"..."
+# 📝 Konfigurationsdatei anlegen
+echo "🔧 Erstelle Konfigurationsdatei mit Namen \"$SERVERNAME\"..."
 echo "ServerName=$SERVERNAME" | sudo tee /usr/sbin/config.ini > /dev/null
 
-# systemd-Dienst erstellen
+# ⚙️ systemd-Dienst erstellen
 echo "🛠️ Erstelle systemd-Dienst..."
 sudo bash -c 'cat > /etc/systemd/system/vhusbd.service <<EOF
 [Unit]
@@ -54,15 +60,15 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF'
 
-# Dienst aktivieren und starten
+# 🔄 Dienst aktivieren und starten
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable vhusbd
 sudo systemctl start vhusbd
 
-# Status anzeigen
+# ✅ Fertigmeldung
 echo ""
-echo "✅ VirtualHere USB Server läuft jetzt auf deinem Linux-System (x86_64)!"
+echo "✅ VirtualHere USB Server wurde erfolgreich installiert und gestartet!"
 echo "📡 Servername: $SERVERNAME"
 echo ""
 echo "🔍 Status prüfen mit:"
